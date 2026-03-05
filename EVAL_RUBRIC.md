@@ -1,7 +1,7 @@
 # Todo-Eval: Kapable Platform Eval Rubric
 
 **App:** todo-eval.kapable.run
-**Date:** 2026-03-05
+**Date:** 2026-03-05 (retest after k8way fixes)
 **Method:** Single KAIT session (Sonnet), single natural-language prompt, browser-verified
 
 ---
@@ -25,14 +25,14 @@
 | 1.2 | **Dynamic Data API — Read** | 3 | GET /v1/todos with order_by/order query params works |
 | 1.3 | **Dynamic Data API — Update** | 3 | PATCH /v1/todos/:id toggles completed status |
 | 1.4 | **Dynamic Data API — Delete** | 3 | DELETE /v1/todos/:id removes todo |
-| 1.5 | **Real-time SSE** | 2 | SSE connects and delivers INSERT/UPDATE/DELETE events. Disconnects through kapable-proxy (reconnects but shows "Disconnected"). Direct API works fine. |
+| 1.5 | **Real-time SSE** | 1 | **Retest:** SSE never connects — 0 bytes received through proxy chain (Caddy → kapable-proxy → BFF → API). Browser shows "Disconnected (reconnecting...)" permanently. The BFF `fetch()` to upstream SSE hangs, never returning headers to the client. Not a k8way issue — it's the BFF-to-API SSE proxy that's broken. |
 | 1.6 | **Serverless Functions** | 2 | count-incomplete endpoint works via API proxy (not actual WASM function — uses filter query). Proves the pattern but not the runtime. |
 | 1.7 | **Auth (API Key)** | 3 | Bearer token auth via KAPABLE_API_KEY env var, proxied through BFF |
 | 1.8 | **Connect App Deploy** | 3 | Deployed via pipeline, running at todo-eval.kapable.run |
 | 1.9 | **Schema (table creation)** | 2 | Table created via Dynamic Data API auto-create. Required manual ALTER TABLE for tags jsonb column — platform doesn't auto-alter on new fields. |
 | 1.10 | **Git Push from KAIT** | 3 | KAIT session committed and pushed to GitHub (after fixing GitHub App access) |
 
-**Platform Features Score: 27 / 30**
+**Platform Features Score: 26 / 30**
 
 ---
 
@@ -62,12 +62,12 @@
 | 3.4 | **Priority filter** | 3 | All/High/Med/Low buttons, client-side filtering |
 | 3.5 | **Status filter** | 3 | All/Active/Completed buttons |
 | 3.6 | **Progress bar** | 3 | Green bar showing % complete |
-| 3.7 | **Count Incomplete** | 2 | Works but uses API pagination total (returns 6 instead of 5 — platform filter bug on typed tables) |
+| 3.7 | **Count Incomplete** | 2 | **Retest:** Returns 7 instead of 6 — `filter=completed.eq.false` silently ignored. Platform filter bug on dynamic tables confirmed with CLI test. |
 | 3.8 | **Animations** | 3 | Slide-in on add, slide-out on delete |
-| 3.9 | **SSE event log** | 3 | Real-time log with color-coded ops (INSERT/UPDATE/DELETE) |
+| 3.9 | **SSE event log** | 1 | **Retest:** Event log exists with correct markup but never fires — SSE connection broken means 0 events delivered. Added a todo and it only appeared after manual page refresh. |
 | 3.10 | **Responsive design** | 3 | Mobile breakpoint, flex-wrap, dark theme |
 
-**App Score: 29 / 30**
+**App Score: 27 / 30**
 
 ---
 
@@ -76,7 +76,7 @@
 | # | Bug | Severity | IMP |
 |---|-----|----------|-----|
 | 4.1 | GitHub App "selected repos" doesn't auto-include new repos for KAIT push | Medium | IMP-795 |
-| 4.2 | SSE disconnects through kapable-proxy | Low | Known issue |
+| 4.2 | SSE completely broken through proxy chain — 0 bytes delivered, BFF fetch hangs | **High** | Needs IMP |
 | 4.3 | Dynamic Data API doesn't auto-alter table when POST includes new columns | Medium | Needs IMP |
 | 4.4 | `filter=completed.eq.false` returns wrong count on typed tables | Medium | Needs IMP |
 | 4.5 | Template literal escaping (`\'`) in Bun output — KAIT system prompt should warn | Low | Documented in kait-architecture.md |
@@ -84,7 +84,7 @@
 | 4.7 | OAuth login redirects to /dashboard instead of original URL | Medium | IMP-794 |
 | 4.8 | KAIT repo selector doesn't refresh after GitHub App changes | Low | IMP-796 |
 
-**Bugs found: 8** (3 medium, 5 low) — good signal for platform hardening.
+**Bugs found: 8** (1 high, 3 medium, 4 low) — good signal for platform hardening.
 
 ---
 
@@ -106,14 +106,20 @@
 
 | Category | Score | Max | Percentage |
 |----------|-------|-----|------------|
-| Platform Features | 27 | 30 | 90% |
+| Platform Features | 26 | 30 | 87% |
 | KAIT Session Quality | 18 | 21 | 86% |
-| App Functionality | 29 | 30 | 97% |
-| **Total** | **74** | **81** | **91%** |
+| App Functionality | 27 | 30 | 90% |
+| **Total** | **71** | **81** | **88%** |
 
-### Grade: A-
+### Grade: B+
 
-**Summary:** The Kapable platform successfully supports building and deploying a feature-rich todo app from a single KAIT session. The Dynamic Data API, auth, SSE, and Connect App pipeline all work well. The main friction points are: (1) GitHub App repo management for KAIT push, (2) SSE proxy stability, and (3) schema evolution (auto-alter). KAIT's code generation quality is high — one prompt produced 5 features correctly, with only a template literal escaping bug. Cost efficiency is excellent at ~$0.30 total.
+**Summary (retest 2026-03-05):** The Kapable platform supports building and deploying a feature-rich todo app from a single KAIT session. Dynamic Data API CRUD, auth, filters, and Connect App pipeline all work well. **Two critical gaps remain:**
+
+1. **SSE is fully broken through the proxy chain** — the BFF's fetch-and-stream pattern never delivers data to the browser (0 bytes received, permanent "Disconnected"). This means new items don't appear until manual page refresh. The k8way fixes did not address this — the issue is in the BFF→API SSE proxy, not k8way.
+
+2. **API filters are silently ignored** — `filter=completed.eq.false` returns all rows, making count-incomplete report 7 instead of 6. This is a platform-level Dynamic Data API bug.
+
+KAIT's code generation quality remains high — one prompt produced 5 features at $0.15. GitHub App push is now fixed (IMP-795 resolved).
 
 ### Recipe for Reproducing
 
