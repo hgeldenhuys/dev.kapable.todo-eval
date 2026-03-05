@@ -1,0 +1,10 @@
+{
+  "name": "todo-eval",
+  "version": "1.0.0",
+  "description": "Platform eval rubric - TODO app stress test",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts"
+  },
+  "dependencies": {}
+}

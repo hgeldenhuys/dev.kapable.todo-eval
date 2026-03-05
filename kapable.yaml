@@ -1,0 +1,8 @@
+framework: bun-server
+
+env:
+  KAPABLE_API_URL: "https://api.kapable.dev"
+  KAPABLE_PROJECT_ID: "2480d50d-a2e5-4617-949f-a5c371b5ce41"
+
+# KAPABLE_API_KEY is set via container env on production
+# See: ssh kapable-prod-root "incus config set kap-kapable-todo-eval-production environment.KAPABLE_API_KEY=..."
