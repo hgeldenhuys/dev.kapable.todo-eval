@@ -74,7 +74,7 @@ const server = Bun.serve({
 
     // API proxy — /api/todos/* → /v1/todos/*
     if (path.startsWith("/api/todos")) {
-      const apiPath = path.replace("/api/todos", "/v1/todos");
+      const apiPath = path.replace("/api/todos", "/v1/todos") + url.search;
       const body = req.method !== "GET" && req.method !== "DELETE"
         ? await req.text()
         : undefined;
