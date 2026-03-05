@@ -544,13 +544,13 @@ const HTML = `<!DOCTYPE html>
           return (
             '<li class="todo-item ' + (t.completed ? 'completed' : '') + '" data-id="' + t.id + '">' +
               '<div class="todo-checkbox ' + (t.completed ? 'checked' : '') + '"' +
-                ' onclick="toggleTodo(\'' + t.id + '\',' + t.completed + ')"></div>' +
+                ' onclick="toggleTodo(\\'' + t.id + '\\',' + t.completed + ')"></div>' +
               '<div class="todo-meta">' +
                 '<div class="todo-title">' + escapeHtml(t.title) + '</div>' +
                 renderTags(t.tags) +
               '</div>' +
               '<span class="todo-priority priority-' + (t.priority || 'medium') + '">' + (t.priority || 'medium') + '</span>' +
-              '<button class="todo-delete" onclick="deleteTodo(\'' + t.id + '\')">&times;</button>' +
+              '<button class="todo-delete" onclick="deleteTodo(\\'' + t.id + '\\')">&times;</button>' +
             '</li>'
           );
         }).join('');
