@@ -41,6 +41,7 @@ function serveHtml(): Response {
 const server = Bun.serve({
   port,
   hostname: "0.0.0.0",
+  idleTimeout: 255,
   async fetch(req) {
     const url = new URL(req.url);
     const path = url.pathname;
