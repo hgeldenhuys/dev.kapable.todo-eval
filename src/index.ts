@@ -14,8 +14,7 @@ const API_KEY = process.env.KAPABLE_API_KEY || "";
 const PROJECT_ID = process.env.KAPABLE_PROJECT_ID || "";
 
 if (!API_KEY) {
-  console.error("[todo-eval] KAPABLE_API_KEY not set!");
-  process.exit(1);
+  console.warn("[todo-eval] WARNING: KAPABLE_API_KEY not set — API calls will fail");
 }
 
 /** Proxy requests to the Kapable API */
