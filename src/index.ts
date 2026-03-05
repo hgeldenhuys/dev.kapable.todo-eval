@@ -1,4 +1,3 @@
-// KAIT git push test - this comment proves KAIT can push to this repo
 /**
  * Todo Eval — Kapable Platform Stress Test App
  *
